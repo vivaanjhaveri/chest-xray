@@ -1,4 +1,4 @@
-name: xray-analysis
+name: xray-svc
 channels:
   - conda-forge
   - defaults
