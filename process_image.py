@@ -28,13 +28,3 @@ def process_image(image_name):
   return features
 
 
-image_1 = "infiltration1_ap.png"
-image_2 = "infiltration2_ap.png"
-image_3 = "nofinding1_ap.png"
-image_4 = "nofinding2_ap.png"
-
-
-print(F.cosine_similarity(process_image(image_1).unsqueeze(0),process_image(image_2).unsqueeze(0)))
-print(F.cosine_similarity(process_image(image_3).unsqueeze(0),process_image(image_4).unsqueeze(0)))
-print(F.cosine_similarity(process_image(image_1).unsqueeze(0),process_image(image_3).unsqueeze(0)))
-print(F.cosine_similarity(process_image(image_2).unsqueeze(0),process_image(image_4).unsqueeze(0)))
