@@ -20,32 +20,33 @@ spec = ServerlessSpec(
 index_name = 'nih-xray-2025'
 # index_name = 'test'
 
-if index_name in pc.list_indexes().names():
-    pc.delete_index(index_name)
+# if index_name in pc.list_indexes().names():
+#     pc.delete_index(index_name)
      
-dimension = 2048 # limit 4194304 bytes
-pc.create_index(
-    name = index_name,
-    dimension = dimension,
-    metric = 'cosine',
-    spec = spec)
+# dimension = 2048 # limit 4194304 bytes
+# pc.create_index(
+#     name = index_name,
+#     dimension = dimension,
+#     metric = 'cosine',
+#     spec = spec)
 
 # ===========================
 # 2 PROCESS vector images
 #    https://developers.google.com/drive/v2/web/search-parameters
 def open_images(folder_dir: str):
     iterable = []
+    i = 0
     for image in os.listdir(folder_dir):
+        i += 1
+        if i % 50 == 0:
+            print('image', i)
         if (image.endswith(".png")):
-            vector = process_image(folder_dir + r"/" + image)
-            # print(vector)
-            # print(image)
-            # print(vector)
+            vector = process_image(folder_dir + r"/" + image) #.numpy().astype(float)
             iterable.append((image, vector))
     return iterable
 
 # Example generator that generates many (id, vector) pairs
-folder_dir = r'C:\Users\Hello\Documents\code2025\nih_xray_2025\chest-xray\images'
+folder_dir = r'C:\Users\Hello\.cache\kagglehub\datasets\nih-chest-xrays\data\versions\3\images_001\images'
 image_vectors = open_images(folder_dir)
 
 # ===========================
@@ -66,14 +67,10 @@ def chunks(iterable, batch_size=200):
 
 
 start_time = time.time()
-obj = {"id": image_vectors[0][0], "values": image_vectors[0][1]}
 
-out_file = open("myfile.json", "w")
-out_file.write(str(obj))
-print(obj)
-index.upsert(vectors=[obj]) 
+# index.upsert(vectors=image_vectors) 
 
 # # Upsert data with 200 vectors per upsert request
-# for ids_vectors_chunk in chunks(image_vectors, batch_size=200):
-#     index.upsert(vectors=ids_vectors_chunk, batch_size=1) 
+for ids_vectors_chunk in chunks(image_vectors, batch_size=200):
+    index.upsert(vectors=ids_vectors_chunk, batch_size=1) 
 print("--- %s seconds ---" % (time.time() - start_time))
