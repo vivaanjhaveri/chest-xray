@@ -1,7 +1,9 @@
 # chest-xray
 
+<br>
 
-### conda env - Feature Eng
+### Conda Environments: 
+#### Feature Eng
 Create the conda environment: 
 
 `conda env create -f environment.yml`
@@ -9,8 +11,9 @@ Create the conda environment:
 Activate the conda environment: 
 
 `conda activate xray-analysis`
+<br>
 
-### conda env - SVC Processing
+#### SVC Processing
 Create the conda environment: 
 
 `conda env create -f inference_env.yml`
