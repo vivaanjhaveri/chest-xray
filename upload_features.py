@@ -38,6 +38,11 @@ def open_images(folder_dir: str):
     i = 0
     for image in os.listdir(folder_dir):
         i += 1
+        if i < 1200:
+            continue
+        # elif i > :
+        #     break
+
         if i % 50 == 0:
             print('image', i)
         if (image.endswith(".png")):
@@ -46,15 +51,18 @@ def open_images(folder_dir: str):
     return iterable
 
 # Example generator that generates many (id, vector) pairs
+
+start_time = time.time()
 folder_dir = r'C:\Users\Hello\.cache\kagglehub\datasets\nih-chest-xrays\data\versions\3\images_001\images'
 image_vectors = open_images(folder_dir)
+print("--- %s seconds ---" % (time.time() - start_time))
+
 
 # ===========================
 # wait for INDEX to be ready
 while not pc.describe_index(index_name).status['ready']:
     time.sleep(1)
 print('----Pinecone index is ready!')
-index= pc.Index(index_name)
 
 
 def chunks(iterable, batch_size=200):
@@ -66,11 +74,22 @@ def chunks(iterable, batch_size=200):
         chunk = tuple(itertools.islice(it, batch_size))
 
 
-start_time = time.time()
 
 # index.upsert(vectors=image_vectors) 
 
+start_time = time.time()
 # # Upsert data with 200 vectors per upsert request
-for ids_vectors_chunk in chunks(image_vectors, batch_size=200):
-    index.upsert(vectors=ids_vectors_chunk, batch_size=1) 
+# for ids_vectors_chunk in chunks(image_vectors, batch_size=200):
+#     index.upsert(vectors=ids_vectors_chunk) 
+
+# Parallalize
+host = r'https://nih-xray-2025-th0zwic.svc.aped-4627-b74a.pinecone.io'
+with pc.Index(host=host, pool_threads=30) as index:
+    # Send requests in parallel
+    async_results = [
+        index.upsert(vectors=ids_vectors_chunk, async_req=True)
+        for ids_vectors_chunk in chunks(image_vectors, batch_size=200)
+    ]
+    # Wait for and retrieve responses (this raises in case of error)
+    [async_result.get() for async_result in async_results]
 print("--- %s seconds ---" % (time.time() - start_time))
