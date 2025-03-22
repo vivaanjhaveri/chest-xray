@@ -5,18 +5,16 @@ channels:
   - defaults
 dependencies:
   - python
-  - pip=22.0.4
-  - pytorch=1.12.0
-  - torchvision=0.13.0
-  # - cudatoolkit=11.3
+  - pip
+  - pytorch
+  - torchvision
   - pinecone
-  - numpy=1.22.3
-  - pandas=1.4.2
-  - scikit-learn=1.0.2
-  - matplotlib=3.5.1
-  - pillow=9.0.1
-  - tqdm
-  - joblib=1.1.0
+  - numpy
+  - pandas
+  - scikit-learn
+  - matplotlib
+  - pillow
+  - joblib
   - pip:
-      - opencv-python==4.5.5.64
-      - albumentations==1.1.0
+      - opencv-python
+      - albumentations
