@@ -17,13 +17,13 @@ spec = ServerlessSpec(
     region="us-east-1"
   )
 
-# index_name = 'nih-xray-2025'
-index_name = 'test'
+index_name = 'nih-xray-2025'
+# index_name = 'test'
 
 if index_name in pc.list_indexes().names():
     pc.delete_index(index_name)
      
-dimension = 20000 # limit 4194304 bytes
+dimension = 2048 # limit 4194304 bytes
 pc.create_index(
     name = index_name,
     dimension = dimension,
@@ -38,10 +38,9 @@ def open_images(folder_dir: str):
     for image in os.listdir(folder_dir):
         if (image.endswith(".png")):
             vector = process_image(folder_dir + r"/" + image)
-            print(vector)
-            print(image)
             # print(vector)
-            
+            # print(image)
+            # print(vector)
             iterable.append((image, vector))
     return iterable
 
