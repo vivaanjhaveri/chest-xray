@@ -8,7 +8,7 @@ import numpy.linalg as norm
 
 
 efficientnet = models.efficientnet_b5(pretrained=True)  # Load ResNet-50
-efficientnet = torch.nn.Sequential(*list(resnet50.children())[:-1])  # Remove the last layer
+efficientnet = torch.nn.Sequential(*list(efficientnet.children())[:-1])  # Remove the last layer
 efficientnet.eval()  # Set the model to evaluation mode
 
 # Preprocess the input image
