@@ -23,7 +23,7 @@ def process_image(image_name):
   image = Image.open(image_name).convert("RGB")
   image_tensor = transform(image).unsqueeze(0)
   with torch.no_grad():
-    features = resnet50(image_tensor)
+    features = efficientnet(image_tensor)
   features = features.flatten()
   return features
 
