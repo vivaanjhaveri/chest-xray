@@ -1,3 +1,11 @@
+"""
+Authors: Charity Grey, Joel Bonnie, Pushya Jain 
+Editors: Ethan Rajkumar
+
+The purpose of this script is to upload the image vectors to Pinecone and perform feature extraction. 
+ 
+"""
+
 import os
 from pinecone import Pinecone, ServerlessSpec, PodSpec
 import time
@@ -7,6 +15,8 @@ import numpy as np
 import json
 import itertools
 from process_image import process_image
+import torch
+
 
 # ===========================
 # 1 Initialize a Pinecone client with your API key
@@ -19,10 +29,8 @@ spec = ServerlessSpec(
 
 index_name = 'nih-xray-2025'
 # index_name = 'test'
-
-# if index_name in pc.list_indexes().names():
-#     pc.delete_index(index_name)
      
+## Create a new index
 # dimension = 2048 # limit 4194304 bytes
 # pc.create_index(
 #     name = index_name,
@@ -38,12 +46,11 @@ def open_images(folder_dir: str):
     i = 0
     for image in os.listdir(folder_dir):
         i += 1
-        # if i < 1200:
+        # if i < 200:
         #     continue
         # elif i > :
         #     break
-
-        if i % 50 == 0:
+        if i % 500 == 0:
             print('image', i)
         if (image.endswith(".png")):
             vector = process_image(folder_dir + r"/" + image) #.numpy().astype(float)
@@ -53,7 +60,7 @@ def open_images(folder_dir: str):
 # Example generator that generates many (id, vector) pairs
 
 start_time = time.time()
-folder_dir = r'C:\Users\Hello\.cache\kagglehub\datasets\nih-chest-xrays\data\versions\3\images_003\images'
+folder_dir = r'/Users/ethanelliotrajkumar/Downloads/chest-xray-main/images_004/images'
 image_vectors = open_images(folder_dir)
 print("--- %s seconds ---" % (time.time() - start_time))
 
@@ -93,3 +100,4 @@ with pc.Index(host=host, pool_threads=30) as index:
     # Wait for and retrieve responses (this raises in case of error)
     [async_result.get() for async_result in async_results]
 print("--- %s seconds ---" % (time.time() - start_time))
+
