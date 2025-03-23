@@ -1,3 +1,8 @@
+"""
+Authors: Joel Bonnie 
+The purpose of this script is to test the MPS functionality of PyTorch with Apple silicon. 
+""" 
+
 
 import os
 from pinecone import Pinecone, ServerlessSpec, PodSpec

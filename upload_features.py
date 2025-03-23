@@ -1,3 +1,11 @@
+"""
+Authors: Charity Grey, Joel Bonnie, Pushya Jain 
+Editors: Ethan Rajkumar
+
+The purpose of this script is to upload the image vectors to Pinecone and perform feature extraction. 
+ 
+"""
+
 import os
 from pinecone import Pinecone, ServerlessSpec, PodSpec
 import time
@@ -92,3 +100,4 @@ with pc.Index(host=host, pool_threads=30) as index:
     # Wait for and retrieve responses (this raises in case of error)
     [async_result.get() for async_result in async_results]
 print("--- %s seconds ---" % (time.time() - start_time))
+

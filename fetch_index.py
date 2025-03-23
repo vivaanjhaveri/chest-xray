@@ -1,3 +1,12 @@
+"""
+Authors: Vivaan Jhaveri, Erfan Javed, Charity G. 
+Editors: Joel Bonnie, Ethan Rajkumar
+
+The purpose of this script is to fetch the vectors for the image indexes from PineCone. 
+
+"""
+
+
 import os
 # from pinecone import Pinecone, ServerlessSpec, PodSpec
 import time
@@ -22,6 +31,7 @@ data_df = pd.read_csv('data/Data_Entry_2017.csv')
 # Assuming the image indexes are in a column named "Image Index"
 # Get unique image indexes to avoid duplicates
 image_indexes = data_df['Image Index'].unique().tolist()
+p
 
 batch_size = 1000
 vectors_dict = {}
@@ -44,3 +54,4 @@ df_vectors = pd.DataFrame(list(vectors_dict.items()), columns=["Image Index", "V
 df_vectors.to_csv('vectors.csv', index=False)
 
 print("Completed fetching vectors for {} image indexes.".format(len(vectors_dict)))
+
