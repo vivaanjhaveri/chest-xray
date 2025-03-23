@@ -42,7 +42,6 @@ def open_images(folder_dir: str):
         #     continue
         # elif i > :
         #     break
-
         if i % 500 == 0:
             print('image', i)
         if (image.endswith(".png")):
@@ -53,7 +52,7 @@ def open_images(folder_dir: str):
 # Example generator that generates many (id, vector) pairs
 
 start_time = time.time()
-folder_dir = r'/Users/ethanelliotrajkumar/Downloads/chest-xray-main/images_010/images'
+folder_dir = r'/Users/ethanelliotrajkumar/Downloads/chest-xray-main/images_004/images'
 image_vectors = open_images(folder_dir)
 print("--- %s seconds ---" % (time.time() - start_time))
 
