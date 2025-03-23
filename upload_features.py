@@ -21,10 +21,8 @@ spec = ServerlessSpec(
 
 index_name = 'nih-xray-2025'
 # index_name = 'test'
-
-# if index_name in pc.list_indexes().names():
-#     pc.delete_index(index_name)
      
+## Create a new index
 # dimension = 2048 # limit 4194304 bytes
 # pc.create_index(
 #     name = index_name,
@@ -55,7 +53,7 @@ def open_images(folder_dir: str):
 # Example generator that generates many (id, vector) pairs
 
 start_time = time.time()
-folder_dir = r'/Users/ethanelliotrajkumar/Downloads/chest-xray-main/images_008/images'
+folder_dir = r'/Users/ethanelliotrajkumar/Downloads/chest-xray-main/images_010/images'
 image_vectors = open_images(folder_dir)
 print("--- %s seconds ---" % (time.time() - start_time))
 
