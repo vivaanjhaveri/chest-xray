@@ -6,8 +6,9 @@ from PIL import Image
 import numpy as np
 import numpy.linalg as norm
 
+device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
 
-efficientnet = models.efficientnet_b5(pretrained=True)  # Load ResNet-50
+efficientnet = models.efficientnet_b5(pretrained=True).to(device)  # Load ResNet-50
 efficientnet = torch.nn.Sequential(*list(efficientnet.children())[:-1])  # Remove the last layer
 efficientnet.eval()  # Set the model to evaluation mode
 
@@ -21,7 +22,7 @@ transform = transforms.Compose([
 # Process Image:
 def process_image(image_name):
   image = Image.open(image_name).convert("RGB")
-  image_tensor = transform(image).unsqueeze(0)
+  image_tensor = transform(image).unsqueeze(0).to(device)
   with torch.no_grad():
     features = efficientnet(image_tensor)
   features = features.flatten()
