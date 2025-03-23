@@ -15,6 +15,7 @@ dependencies:
   - matplotlib
   - pillow
   - joblib
+  - seaborn
   - pip:
       - opencv-python
       - albumentations
