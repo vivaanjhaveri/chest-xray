@@ -31,7 +31,7 @@ data_df = pd.read_csv('data/Data_Entry_2017.csv')
 # Assuming the image indexes are in a column named "Image Index"
 # Get unique image indexes to avoid duplicates
 image_indexes = data_df['Image Index'].unique().tolist()
-p
+
 
 batch_size = 1000
 vectors_dict = {}
@@ -50,6 +50,8 @@ for i in range(0, len(image_indexes), batch_size):
         if img_id in response.vectors:
             # vectors_dict[img_id] = response['vectors'][img_id]['values']
             vectors_dict[img_id] = response.vectors[img_id].values
+            # if i% 5000 == 0:
+            #     print(f"{img_id} : The vector length is {len(response.vectors[img_id].values)}")
         else:
             vectors_dict[img_id] = None
 
