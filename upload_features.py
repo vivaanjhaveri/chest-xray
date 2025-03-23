@@ -7,6 +7,8 @@ import numpy as np
 import json
 import itertools
 from process_image import process_image
+import torch
+
 
 # ===========================
 # 1 Initialize a Pinecone client with your API key
@@ -38,12 +40,12 @@ def open_images(folder_dir: str):
     i = 0
     for image in os.listdir(folder_dir):
         i += 1
-        if i < 200:
-            continue
+        # if i < 200:
+        #     continue
         # elif i > :
         #     break
 
-        if i % 50 == 0:
+        if i % 500 == 0:
             print('image', i)
         if (image.endswith(".png")):
             vector = process_image(folder_dir + r"/" + image) #.numpy().astype(float)
@@ -53,7 +55,7 @@ def open_images(folder_dir: str):
 # Example generator that generates many (id, vector) pairs
 
 start_time = time.time()
-folder_dir = r'/Users/ethanelliotrajkumar/Downloads/chest-xray-main/images_007/images'
+folder_dir = r'/Users/ethanelliotrajkumar/Downloads/chest-xray-main/images_008/images'
 image_vectors = open_images(folder_dir)
 print("--- %s seconds ---" % (time.time() - start_time))
 
