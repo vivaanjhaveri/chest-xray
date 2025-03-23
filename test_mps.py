@@ -1,5 +1,5 @@
 """
-Authors: Joel Bonnie 
+Authors: Joel Bonnie
 The purpose of this script is to test the MPS functionality of PyTorch with Apple silicon. 
 """ 
 
