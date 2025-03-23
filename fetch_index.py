@@ -1,5 +1,5 @@
 """
-Authors: Vivaan Jhaveri, Erfan Javed, Charity G. 
+Authors: Vivaan Jhaveri, Erhan Javed, Charity G. 
 Editors: Joel Bonnie, Ethan Rajkumar
 
 The purpose of this script is to fetch the vectors for the image indexes from PineCone. 
