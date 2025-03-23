@@ -38,8 +38,8 @@ def open_images(folder_dir: str):
     i = 0
     for image in os.listdir(folder_dir):
         i += 1
-        if i < 1200:
-            continue
+        # if i < 1200:
+        #     continue
         # elif i > :
         #     break
 
@@ -53,7 +53,7 @@ def open_images(folder_dir: str):
 # Example generator that generates many (id, vector) pairs
 
 start_time = time.time()
-folder_dir = r'C:\Users\Hello\.cache\kagglehub\datasets\nih-chest-xrays\data\versions\3\images_001\images'
+folder_dir = r'C:\Users\Hello\.cache\kagglehub\datasets\nih-chest-xrays\data\versions\3\images_003\images'
 image_vectors = open_images(folder_dir)
 print("--- %s seconds ---" % (time.time() - start_time))
 
