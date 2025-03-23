@@ -38,14 +38,18 @@ vectors_dict = {}
 
 # Loop through image_indexes in batches of 1000
 for i in range(0, len(image_indexes), batch_size):
+    print(f'Current Index: {i}')
+    
     batch_ids = image_indexes[i: i + batch_size]
     # Fetch the vectors for the current batch
     response = index.fetch(ids=batch_ids, namespace="")
     
     # Map each image index in the batch to its vector values (or None if missing)
     for img_id in batch_ids:
-        if img_id in response.get('vectors', {}):
-            vectors_dict[img_id] = response['vectors'][img_id]['values']
+        # if img_id in response.get('vectors', {}):
+        if img_id in response.vectors:
+            # vectors_dict[img_id] = response['vectors'][img_id]['values']
+            vectors_dict[img_id] = response.vectors[img_id].values
         else:
             vectors_dict[img_id] = None
 
