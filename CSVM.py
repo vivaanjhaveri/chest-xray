@@ -1,3 +1,9 @@
+"""
+Author: Ethan Rajkumar
+Editor: 
+The purpose of this code is to implement a custom C-SVM model/classification for multi-label classification problems.
+"""
+
 import numpy as np
 from collections import defaultdict
 
@@ -5,27 +11,31 @@ class CSVM:
     """
     Custom C-SVM implementation for multi-label classification problems.
     Each instance can have 1-3 labels.
+
+    Parameters (for initialization):
+    --------------------------------
+    C : float, default=1.0
+        Regularization parameter. Trades off margin size and training error.
+    kernel : str, default='linear'
+        Kernel type to be used. Options: 'linear', 'poly', 'rbf', 'matern'
+    tol : float, default=1e-3
+        Tolerance for stopping criterion.
+    max_iter : int, default=1000
+        Maximum number of iterations.
+    learning_rate : float, default=0.01
+        Learning rate for gradient descent.
+
+    Methods:
+    --------
+    fit(X, y_multilabel):
+        Fits the SVM model to the provided multi-label data.
+    predict(X):
+        Predicts labels for input samples.
+    score(X, y_true):
+        Returns an average F1 score for the predictions vs. the true labels.
     """
     
-    def __init__(self, X, y, C=1.0, kernel='linear', tol=1e-3, max_iter=1000, learning_rate=0.01):
-        """
-        Initialize the C-SVM.
-        
-        Parameters:
-        -----------
-        C : float, default=1.0
-            Regularization parameter. Trades off margin size and training error.
-        kernel : str, default='linear'
-            Kernel type to be used. Options: 'linear', 'poly', 'rbf'
-        tol : float, default=1e-3
-            Tolerance for stopping criterion.
-        max_iter : int, default=1000
-            Maximum number of iterations.
-        learning_rate : float, default=0.01
-            Learning rate for gradient descent.
-        """
-        self.X = X
-        self.y = y 
+    def __init__(self, C=1.0, kernel='linear', tol=1e-3, max_iter=1000, learning_rate=0.01):
         self.C = C
         self.kernel = kernel
         self.tol = tol
@@ -33,61 +43,60 @@ class CSVM:
         self.learning_rate = learning_rate
         self.models = {}  # Dict to store binary classifiers
         self.classes_ = None
-        
+    
     def _kernel_function(self, x1, x2):
         """
         Compute the kernel function between two vectors.
         
-        Parameters:
-        -----------
-        x1, x2 : array-like
-            Input vectors.
-            
-        Returns:
-        --------
-        float : Kernel value
+        Currently supported:
+        - linear
+        - polynomial (with degree=2)
+        - rbf (Gaussian)
+        - matern (3/2)
         """
         if self.kernel == 'linear':
+            # Linear kernel
             return np.dot(x1, x2)
+        
         elif self.kernel == 'poly':
+            # Polynomial kernel (degree=2 for simplicity)
             return (np.dot(x1, x2) + 1) ** 2
+        
         elif self.kernel == 'rbf':
+            # Radial Basis Function (Gaussian) kernel
             gamma = 1.0 / x1.shape[0]
             return np.exp(-gamma * np.sum((x1 - x2) ** 2))
+        
+        elif self.kernel == 'matern':
+            # Matern (3/2) kernel
+            # k(r) = (1 + sqrt(3)*r) * exp(-sqrt(3)*r), where r = ||x1 - x2|| / length_scale
+            # We hardcode length_scale = 1.0 for simplicity; adjust as needed.
+            length_scale = 1.0
+            diff = x1 - x2
+            r = np.linalg.norm(diff) / length_scale
+            return (1.0 + np.sqrt(3) * r) * np.exp(-np.sqrt(3) * r)
+        
         else:
             raise ValueError(f"Unsupported kernel: {self.kernel}")
     
     def _compute_gradient(self, X, y, weights, bias):
         """
-        Compute the gradient of the SVM loss function.
+        Compute the gradient of the SVM hinge-loss function (plus L2 regularization).
         
-        Parameters:
-        -----------
-        X : array-like of shape (n_samples, n_features)
-            Training vectors.
-        y : array-like of shape (n_samples,)
-            Target values.
-        weights : array-like of shape (n_features,)
-            Current weights.
-        bias : float
-            Current bias.
-            
-        Returns:
-        --------
-        tuple : (weight_gradient, bias_gradient)
+        NOTE: This code is effectively a linear SVM approach.
+              The _kernel_function is not utilized here.
         """
         n_samples = X.shape[0]
         
-        # Calculate predictions
+        # Predictions and margins
         predictions = np.dot(X, weights) + bias
-        
-        # Compute margins
         margins = y * predictions
         
-        # Calculate the gradient
-        weight_gradient = weights  # Regularization term
+        # Start with the gradient from the regularization term
+        weight_gradient = weights.copy()
         bias_gradient = 0
         
+        # Accumulate gradient from misclassified points (margins < 1)
         for i in range(n_samples):
             if margins[i] < 1:
                 weight_gradient -= self.C * y[i] * X[i]
@@ -97,18 +106,9 @@ class CSVM:
     
     def _train_binary_classifier(self, X, y):
         """
-        Train a binary SVM classifier.
+        Train a binary SVM classifier for a single class (1 vs -1).
         
-        Parameters:
-        -----------
-        X : array-like of shape (n_samples, n_features)
-            Training vectors.
-        y : array-like of shape (n_samples,)
-            Target values.
-            
-        Returns:
-        --------
-        tuple : (weights, bias) parameters of the trained model
+        Currently uses a linear approach: w·x + b
         """
         n_samples, n_features = X.shape
         
@@ -116,23 +116,21 @@ class CSVM:
         weights = np.zeros(n_features)
         bias = 0.0
         
-        # Gradient descent
         for _ in range(self.max_iter):
             weight_gradient, bias_gradient = self._compute_gradient(X, y, weights, bias)
             
-            # Update parameters
+            # Update rule (gradient descent)
             weights -= self.learning_rate * weight_gradient
             bias -= self.learning_rate * bias_gradient
             
-            # Calculate loss for convergence check
+            # Check convergence based on total loss
             predictions = np.dot(X, weights) + bias
             margins = y * predictions
+            
             hinge_loss = np.mean(np.maximum(0, 1 - margins))
             regularization = 0.5 * np.sum(weights ** 2)
-            
             total_loss = regularization + self.C * hinge_loss
             
-            # Check convergence
             if total_loss < self.tol:
                 break
         
@@ -140,46 +138,42 @@ class CSVM:
     
     def fit(self, X, y_multilabel):
         """
-        Fit the SVM model according to the given training data.
+        Fit the SVM model using one-vs-rest strategy for multi-label data.
         
         Parameters:
         -----------
         X : array-like of shape (n_samples, n_features)
             Training vectors.
         y_multilabel : array-like of shape (n_samples, n_labels)
-            Target values. Each row contains 1-3 labels.
-            
-        Returns:
-        --------
-        self : object
+            Each row can have between 1 and 3 labels. Zeros denote "no label".
         """
+        # Convert lists to numpy arrays if needed
         if isinstance(X, list):
             X = np.array(X)
         if isinstance(y_multilabel, list):
             y_multilabel = np.array(y_multilabel)
         
-        # If y is provided as a 1D array, reshape it
+        # Ensure 2D shape in y
         if len(y_multilabel.shape) == 1:
             y_multilabel = y_multilabel.reshape(-1, 1)
         
-        # Get unique classes
+        # Identify unique classes (non-zero)
         unique_classes = set()
         for row in y_multilabel:
             for label in row:
-                if label != 0:  # Assuming 0 means no label
+                if label != 0:
                     unique_classes.add(label)
         
-        self.classes_ = sorted(list(unique_classes))
+        self.classes_ = sorted(unique_classes)
         
-        # Train one-vs-rest binary classifiers for each class
+        # Train one binary classifier (1 vs -1) per class
         for cls in self.classes_:
-            # Create binary labels: 1 if the instance has this class, -1 otherwise
-            binary_y = np.array([-1] * len(y_multilabel))
-            for i, row in enumerate(y_multilabel):
-                if cls in row:
-                    binary_y[i] = 1
+            # Binary labels for this class
+            binary_y = np.array([
+                1 if cls in row else -1 
+                for row in y_multilabel
+            ])
             
-            # Train binary classifier
             weights, bias = self._train_binary_classifier(X, binary_y)
             self.models[cls] = (weights, bias)
         
@@ -187,47 +181,47 @@ class CSVM:
     
     def predict(self, X):
         """
-        Predict class labels for samples in X.
+        Predict the top 1-3 labels for each sample in X.
         
         Parameters:
         -----------
         X : array-like of shape (n_samples, n_features)
-            The input samples.
-            
+        
         Returns:
         --------
-        y_pred : array-like of shape (n_samples, n_max_labels)
-            The predicted classes. Each row contains 1-3 labels.
+        padded_predictions : np.ndarray of shape (n_samples, <= 3)
+            Each row has up to 3 predicted labels (0 used for padding if needed).
         """
         if isinstance(X, list):
             X = np.array(X)
         
         n_samples = X.shape[0]
-        
-        # Store predictions and scores for each class
         predictions = []
         
         for i in range(n_samples):
-            # Get scores for each class
             scores = {}
+            # Compute score for each known class (linearly, ignoring kernel function)
+            # If you wanted kernel-based classification, you'd do something more like:
+            # scores[cls] = sum(alpha_j * y_j * K(x_j, X[i])) + bias
+            # for each support vector x_j. This code is strictly linear.
             for cls in self.classes_:
                 weights, bias = self.models[cls]
                 scores[cls] = np.dot(X[i], weights) + bias
             
-            # Sort classes by scores and get top 3
+            # Sort classes by descending score
             sorted_classes = sorted(scores.items(), key=lambda x: x[1], reverse=True)
             
-            # Take only classes with positive scores, up to 3
+            # Select classes with positive scores, up to 3
             pos_classes = [cls for cls, score in sorted_classes if score > 0][:3]
             
-            # If no positive scores, take the highest score
+            # If no positive scores, choose the top one by raw score
             if not pos_classes and sorted_classes:
                 pos_classes = [sorted_classes[0][0]]
             
             predictions.append(pos_classes)
         
-        # Pad predictions to have consistent shape
-        max_labels = max(len(pred) for pred in predictions)
+        # Determine the max number of labels predicted for padding
+        max_labels = max(len(pred) for pred in predictions) if predictions else 0
         padded_predictions = np.zeros((n_samples, max_labels))
         
         for i, pred in enumerate(predictions):
@@ -238,61 +232,42 @@ class CSVM:
     
     def score(self, X, y_true):
         """
-        Calculate the accuracy for the multi-label classification.
+        Compute the average F1 score over all samples.
         
         Parameters:
         -----------
         X : array-like of shape (n_samples, n_features)
-            The input samples.
         y_true : array-like of shape (n_samples, n_labels)
-            True labels.
-            
+        
         Returns:
         --------
-        score : float
-            Average F1 score across all instances.
+        mean_f1 : float
+            Mean F1 score across all samples.
         """
         if isinstance(X, list):
             X = np.array(X)
         if isinstance(y_true, list):
             y_true = np.array(y_true)
         
-        # If y is provided as a 1D array, reshape it
+        # Ensure 2D shape
         if len(y_true.shape) == 1:
             y_true = y_true.reshape(-1, 1)
-            
-        y_pred = self.predict(X)
         
-        # Calculate F1 score for each instance
+        y_pred = self.predict(X)
         f1_scores = []
         
         for i in range(len(y_true)):
             true_set = set(y_true[i][y_true[i] != 0])
             pred_set = set(y_pred[i][y_pred[i] != 0])
             
-            true_positive = len(true_set.intersection(pred_set))
-            false_positive = len(pred_set - true_set)
-            false_negative = len(true_set - pred_set)
+            tp = len(true_set & pred_set)
+            fp = len(pred_set - true_set)
+            fn = len(true_set - pred_set)
             
-            precision = true_positive / (true_positive + false_positive) if (true_positive + false_positive) > 0 else 0
-            recall = true_positive / (true_positive + false_negative) if (true_positive + false_negative) > 0 else 0
+            precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+            recall   = tp / (tp + fn) if (tp + fn) > 0 else 0
             
             f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
             f1_scores.append(f1)
         
         return np.mean(f1_scores)
-    
-
-if __name__ == "__main__":
-
-    # Initialize and train the model
-    model = CSVM(C=1.0, kernel='linear', max_iter=1000, learning_rate=0.01)
-    model.fit(X, y)
-    
-    # Make predictions on your test data
-    y_pred = model.predict(X_test)  # Assuming X_test is defined
-    
-    # Evaluate the model
-    score = model.score(X_test, y_test)  # Assuming y_test is defined
-    print(f"F1 Score: {score:.4f}")
-    
