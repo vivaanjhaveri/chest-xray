@@ -11,6 +11,13 @@
 <br>
 Chest X-rays, a primary diagnostic tool for identifying thoracic diseases, are the focus of our project, which aims to develop an efficient X-ray representation for automating and benchmarking weakly supervised classification and localization of common thoracic diseases. By leveraging clinical metadata, bounding box annotations, and efficient vector retrieval via Pinecone, we address challenges posed by large-scale datasets (~112k X-rays), annotation constraints, and weak supervision, and build robust classification models using Support Vector Machines (SVM) and Random Forest classifiers.
 
+## Overall metrics for positive classes:
+- Overall positive recall: 0.1135
+- Overall positive precision: 0.3384
+- Overall positive F1 score: 0.1700
+- Mean AUC ROC: 0.7242
+- Mean Average Precision: 0.1253
+
 ---
 <br>
 
